@@ -1074,12 +1074,10 @@ export default function HomePage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Matricule</TableHead>
-                        <TableHead className="min-w-[120px]">Nom</TableHead>
-                        <TableHead className="min-w-[160px]">Intitulé unité</TableHead>
-                        <TableHead className="min-w-[180px]">Emploi occupé</TableHead>
-                        <TableHead className="min-w-[180px]">Intitulé département</TableHead>
-                        <TableHead>Civilité</TableHead>
-                        <TableHead className="min-w-[100px]">Actions</TableHead>
+                        <TableHead className="min-w-[180px]">Nom</TableHead>
+                        <TableHead className="min-w-[200px]">Prénom</TableHead>
+                        <TableHead className="min-w-[200px]">Emploi occupé</TableHead>
+                        <TableHead className="min-w-[150px]">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -1087,15 +1085,11 @@ export default function HomePage() {
                         return (
                           <TableRow key={employee.id}>
                             <TableCell className="font-medium">{employee.matricule}</TableCell>
-                            <TableCell className="max-w-[120px] truncate">
-                              {employee.prenom} {employee.nom}
+                            <TableCell className="max-w-[180] truncate">
+                              {employee.nom}
                             </TableCell>
-                            <TableCell className="max-w-[160px] truncate">{employee.intituleUnite}</TableCell>
-                            <TableCell className="max-w-[180px] truncate">{employee.emploiOccupe}</TableCell>
-                            <TableCell className="max-w-[180px] truncate">{employee.intituleDepartement}</TableCell>
-                            <TableCell className="max-w-[50px]">
-                              <Badge variant="outline">{formatCivilite(employee.civilite)}</Badge>
-                            </TableCell>
+                            <TableCell className="max-w-[200px] truncate">{employee.prenom}</TableCell>
+                            <TableCell className="max-w-[200px] truncate">{employee.emploiOccupe}</TableCell>
                             <TableCell>
                               <div className="flex gap-1">
                                 <Button
@@ -1145,13 +1139,10 @@ export default function HomePage() {
                       <MobileCard
                         key={employee.id}
                         title={`${employee.prenom} ${employee.nom}`}
-                        subtitle={`${employee.matricule}`}
                         content={[
-                          { label: "Intitulé unité", value: employee.intituleUnite },
+                          { label: "Matricule", value: employee.matricule },
                           { label: "Emploi Occupé", value: employee.emploiOccupe },
-                          { label: "Intitulé département", value: employee.intituleDepartement },
                         ]}
-                        badge={{ text: employee.civilite, variant: "outline" }}
                         actions={{
                           onView: () => setSelectedEmployeeHistory(employee),
                           onEdit: () => {
@@ -1583,10 +1574,7 @@ function EmployeeForm({
     matricule: employee?.matricule || "",
     nom: employee?.nom || "",
     prenom: employee?.prenom || "",
-    intituleUnite: employee?.intituleUnite || "",
     emploiOccupe: employee?.emploiOccupe || "",
-    intituleDepartement: employee?.intituleDepartement || "",
-    civilite: employee?.civilite || "M",
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -1630,51 +1618,17 @@ function EmployeeForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="intituleUnite">Intitulé Unité</Label>
-          <Input
-            id="intituleUnite"
-            value={formData.intituleUnite}
-            onChange={(e) => setFormData({ ...formData, intituleUnite: e.target.value })}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="emploiOccupe">Emploi Occupé</Label>
-          <Input
-            id="emploiOccupe"
-            value={formData.emploiOccupe}
-            onChange={(e) => setFormData({ ...formData, emploiOccupe: e.target.value })}
-            required
-          />
-        </div>
+     
+      <div className="space-y-2">
+        <Label htmlFor="emploiOccupe">Emploi Occupé</Label>
+        <Input
+          id="emploiOccupe"
+          value={formData.emploiOccupe}
+          onChange={(e) => setFormData({ ...formData, emploiOccupe: e.target.value })}
+          required
+        />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="intituleDepartement">Intitulé Département</Label>
-          <Input
-            id="intituleDepartement"
-            value={formData.intituleDepartement}
-            onChange={(e) => setFormData({ ...formData, intituleDepartement: e.target.value })}
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="civilite">Civilité</Label>
-          <Select value={formData.civilite} onValueChange={(value) => setFormData({ ...formData, civilite: value })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner une civilité" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Monsieur">Monsieur</SelectItem>
-              <SelectItem value="Madame">Madame</SelectItem>
-              <SelectItem value="Mademoiselle">Mademoiselle</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
       <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 pt-4">
         <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto bg-transparent" disabled={isLoading}>
           Annuler

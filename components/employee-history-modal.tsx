@@ -7,16 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar, FileText, Activity } from "lucide-react"
 import { usePagination } from "@/hooks/use-pagination"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
-
-// ✅ Imports Firestore
+import { TablePagination } from "@/hooks/TablePagination"
 import { db } from "@/lib/firebase" // adapte selon ton projet
 import { collection, onSnapshot, query, where } from "firebase/firestore"
 
@@ -70,18 +61,8 @@ export function EmployeeHistoryModal({ employee, isOpen, onClose }: EmployeeHist
   const totalRestDays = employeeConsultations.reduce((sum, c) => sum + (c.repos?.accorde ? c.repos.duree : 0), 0)
 
   // Pagination
-  const {
-    currentPage,
-    totalPages,
-    paginatedData: paginatedConsultations,
-    goToPage,
-    goToNextPage,
-    goToPreviousPage,
-    hasNextPage,
-    hasPreviousPage,
-  } = usePagination({
+  const paginatedConsultations = usePagination({
     data: employeeConsultations,
-    itemsPerPage: 5,
   })
 
   if (!employee) return null
@@ -91,7 +72,7 @@ export function EmployeeHistoryModal({ employee, isOpen, onClose }: EmployeeHist
       <DialogContent className="max-w-6xl h-full overflow-y-auto sm:max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>
-            Historique Médical - {employee.civilite}. {employee.prenom} {employee.nom}
+            Historique Médical - {employee.prenom} {employee.nom}
           </DialogTitle>
           <p className="text-muted-foreground">
             {employee.emploiOccupe} • Matricule: {employee.matricule}
@@ -116,16 +97,12 @@ export function EmployeeHistoryModal({ employee, isOpen, onClose }: EmployeeHist
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <span className="font-medium">Intitulé Unité:</span>
-                    <p className="text-muted-foreground">{employee.intituleUnite}</p>
+                    <span className="font-medium">Matricule:</span>
+                    <p className="text-muted-foreground">{employee.matricule}</p>
                   </div>
                   <div>
                     <span className="font-medium">Emploi Occupé:</span>
                     <p className="text-muted-foreground">{employee.emploiOccupe}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium">Intitulé Département:</span>
-                    <p className="text-muted-foreground">{employee.intituleDepartement}</p>
                   </div>
                 </div>
               </CardContent>
@@ -168,7 +145,7 @@ export function EmployeeHistoryModal({ employee, isOpen, onClose }: EmployeeHist
                   </p>
                 ) : (
                   <>
-                    {paginatedConsultations.map((consultation) => {
+                    {paginatedConsultations.paginatedData.map((consultation) => {
                       const doctor = doctorsList.find((d) => d.id === consultation.medecinId)
                       return (
                         <div key={consultation.id} className="border rounded-lg p-4 space-y-3 mb-4">
@@ -178,15 +155,21 @@ export function EmployeeHistoryModal({ employee, isOpen, onClose }: EmployeeHist
                           <div className="text-sm text-muted-foreground">
                             Dr. {doctor?.nom} {doctor?.prenom} • {doctor?.specialite}
                           </div>
+                          {consultation.diagnostic && (
                           <div className="text-sm">
                             Diagnostic: {consultation.diagnostic || "Aucun"}
                           </div>
+                          )}
+                          {consultation.traitement && (
                           <div className="text-sm">
                             Traitement: {consultation.traitement || "Aucun"}
                           </div>
+                          )}
+                          {consultation.observations && (
                           <div className="text-sm">
                             Observations: {consultation.observations || "Aucune"}
                           </div>
+                          )}
                           <div>
                             {consultation.repos?.accorde ? (
                               <Badge variant="secondary" className="bg-green-50 text-green-700">
@@ -213,34 +196,12 @@ export function EmployeeHistoryModal({ employee, isOpen, onClose }: EmployeeHist
                       )
                     })}
 
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                      <Pagination>
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious
-                              onClick={goToPreviousPage}
-                              className={!hasPreviousPage ? "opacity-50 pointer-events-none" : ""}
-                            />
-                          </PaginationItem>
-                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                            <PaginationItem key={page}>
-                              <PaginationLink
-                                onClick={() => goToPage(page)}
-                                isActive={currentPage === page}
-                              >
-                                {page}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ))}
-                          <PaginationItem>
-                            <PaginationNext
-                              onClick={goToNextPage}
-                              className={!hasNextPage ? "opacity-50 pointer-events-none" : ""}
-                            />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
+                    {/* Pagination Si il y a plus de 10 consultations */}
+                    {totalConsultations > 10 && (
+                      <TablePagination
+                        pagination={paginatedConsultations}
+                        totalRows={totalConsultations}
+                      />
                     )}
                   </>
                 )}
